@@ -69,24 +69,29 @@ def format_day_schedule(day: str) -> str:
         text += f"• {period}\n"
     return text
 
+TUTORIAL = (
+    "📖 *Quick tutorial*\n"
+    "Use /today for today's schedule, /tomorrow for tomorrow's, "
+    "or /week for the full week."
+)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
         "👋 *PESCE VII Sem CSE-A Timetable Bot*\n\n"
-        "Commands:\n"
-        "👉 /today - Today's schedule\n"
-        "👉 /tomorrow - Tomorrow's schedule\n"
-        "👉 /week - Full week schedule"
+        f"{TUTORIAL}"
     )
     await update.message.reply_markdown(msg)
 
 async def today(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ist = pytz.timezone("Asia/Kolkata")
     day_name = datetime.now(ist).strftime("%A")
+    await update.message.reply_markdown(TUTORIAL)
     await update.message.reply_markdown(format_day_schedule(day_name))
 
 async def tomorrow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ist = pytz.timezone("Asia/Kolkata")
     tomorrow_day = (datetime.now(ist) + timedelta(days=1)).strftime("%A")
+    await update.message.reply_markdown(TUTORIAL)
     await update.message.reply_markdown(format_day_schedule(tomorrow_day))
 
 async def week(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -96,6 +101,7 @@ async def week(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for s in slots:
             msg += f"  • {s}\n"
         msg += "\n"
+    await update.message.reply_markdown(TUTORIAL)
     await update.message.reply_markdown(msg)
 
 if __name__ == "__main__":
