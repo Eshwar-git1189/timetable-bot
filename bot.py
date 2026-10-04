@@ -13,7 +13,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise ValueError("Error: BOT_TOKEN is missing. Please set it in your .env file or Render environment.")
 
-# P.E.S. College of Engineering Mandya - VII Sem CSE-A (Room CRC 203)[cite: 1]
+# P.E.S. College of Engineering Mandya - VII Sem CSE-A (Room CRC 203)
 TIMETABLE = {
     "Monday": [
         "09:30 - 10:30: Research Methodology & IPR (Prof. Sindhu B S)",
@@ -66,7 +66,7 @@ TIMETABLE = {
 
 def format_day_schedule(day: str) -> str:
     periods = TIMETABLE.get(day, ["No classes scheduled."])
-    text = f"🏛️ *Room: CRC 203*\n📅 *Schedule for {day}*:\n\n"[cite: 1]
+    text = f"🏛️ *Room: CRC 203*\n📅 *Schedule for {day}*:\n\n"
     for period in periods:
         text += f"• {period}\n"
     return text
@@ -79,7 +79,7 @@ TUTORIAL = (
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
-        "👋 *PESCE VII Sem CSE-A Timetable Bot*\n\n"[cite: 1]
+        "👋 *PESCE VII Sem CSE-A Timetable Bot*\n\n"
         f"{TUTORIAL}"
     )
     await update.message.reply_markdown(msg)
@@ -97,7 +97,7 @@ async def tomorrow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(TUTORIAL)
 
 async def week(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = "📚 *Weekly Schedule (Room CRC 203)*\n\n"[cite: 1]
+    msg = "📚 *Weekly Schedule (Room CRC 203)*\n\n"
     for day, slots in TIMETABLE.items():
         msg += f"*{day}*:\n"
         for s in slots:
