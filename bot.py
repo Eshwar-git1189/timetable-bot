@@ -1,17 +1,19 @@
+import os
+import asyncio
 from datetime import datetime, timedelta
 import pytz
+from aiohttp import web
+from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import os
-from dotenv import load_dotenv
-
-# --- Paste your BotFather token here ---
 
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
 if not BOT_TOKEN:
-    raise ValueError("Error: BOT_TOKEN is missing. Please set it in your .env file.")
-# P.E.S. College of Engineering Mandya - VII Sem CSE-A (Room CRC 203)
+    raise ValueError("Error: BOT_TOKEN is missing. Please set it in your .env file or Render environment.")
+
+# P.E.S. College of Engineering Mandya - VII Sem CSE-A (Room CRC 203)[cite: 1]
 TIMETABLE = {
     "Monday": [
         "09:30 - 10:30: Research Methodology & IPR (Prof. Sindhu B S)",
@@ -64,7 +66,7 @@ TIMETABLE = {
 
 def format_day_schedule(day: str) -> str:
     periods = TIMETABLE.get(day, ["No classes scheduled."])
-    text = f"🏛️ *Room: CRC 203*\n📅 *Schedule for {day}*:\n\n"
+    text = f"🏛️ *Room: CRC 203*\n📅 *Schedule for {day}*:\n\n"[cite: 1]
     for period in periods:
         text += f"• {period}\n"
     return text
@@ -77,7 +79,7 @@ TUTORIAL = (
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
-        "👋 *PESCE VII Sem CSE-A Timetable Bot*\n\n"
+        "👋 *PESCE VII Sem CSE-A Timetable Bot*\n\n"[cite: 1]
         f"{TUTORIAL}"
     )
     await update.message.reply_markdown(msg)
@@ -95,7 +97,7 @@ async def tomorrow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(TUTORIAL)
 
 async def week(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = "📚 *Weekly Schedule (Room CRC 203)*\n\n"
+    msg = "📚 *Weekly Schedule (Room CRC 203)*\n\n"[cite: 1]
     for day, slots in TIMETABLE.items():
         msg += f"*{day}*:\n"
         for s in slots:
@@ -104,12 +106,39 @@ async def week(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(msg)
     await update.message.reply_markdown(TUTORIAL)
 
-if __name__ == "__main__":
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("today", today))
-    app.add_handler(CommandHandler("tomorrow", tomorrow))
-    app.add_handler(CommandHandler("week", week))
+# --- Render Health Check Endpoint ---
+async def health_check(request):
+    return web.Response(text="Timetable Bot is healthy and polling Telegram.")
 
-    print("Timetable bot is active and polling...")
-    app.run_polling()
+async def main():
+    # 1. Setup Telegram Application
+    bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
+    bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(CommandHandler("today", today))
+    bot_app.add_handler(CommandHandler("tomorrow", tomorrow))
+    bot_app.add_handler(CommandHandler("week", week))
+
+    # Initialize bot and start polling in the background
+    await bot_app.initialize()
+    await bot_app.start()
+    await bot_app.updater.start_polling()
+
+    # 2. Setup Aiohttp Web Server
+    web_app = web.Application()
+    web_app.router.add_get("/", health_check)
+    web_app.router.add_get("/health", health_check)
+
+    # Render automatically injects the PORT environment variable
+    port = int(os.environ.get("PORT", 8080))
+    runner = web.AppRunner(web_app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
+    print(f"Timetable bot is active and web server bound to port {port}...")
+
+    # Keep both running forever
+    await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    asyncio.run(main())
